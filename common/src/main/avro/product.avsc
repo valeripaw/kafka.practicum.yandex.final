@@ -1,0 +1,186 @@
+{
+  "type": "record",
+  "name": "ProductAvro",
+  "namespace": "ru.valeripaw.kafka.dto",
+  "version": "1",
+  "fields": [
+    {
+      "name": "product_id",
+      "type": "string"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "description",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "price",
+      "type": {
+        "name": "PriceAvro",
+        "type": "record",
+        "fields": [
+          {
+            "name": "amount",
+            "type": [
+              "null",
+              "double"
+            ],
+            "default": null
+          },
+          {
+            "name": "currency",
+            "type": [
+              "null",
+              "string"
+            ],
+            "default": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "category",
+      "type": "string"
+    },
+    {
+      "name": "brand",
+      "type": "string"
+    },
+    {
+      "name": "stock",
+      "type": {
+        "name": "StockAvro",
+        "type": "record",
+        "fields": [
+          {
+            "name": "available",
+            "type": [
+              "null",
+              "int"
+            ],
+            "default": null
+          },
+          {
+            "name": "reserved",
+            "type": [
+              "null",
+              "int"
+            ],
+            "default": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "name": "specifications",
+      "type": [
+        "null",
+        {
+          "name": "SpecificationsAvro",
+          "type": "record",
+          "fields": [
+            {
+              "name": "weight",
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": null
+            },
+            {
+              "name": "dimensions",
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": null
+            },
+            {
+              "name": "battery_life",
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": null
+            },
+            {
+              "name": "water_resistance",
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": null
+            }
+          ]
+        }
+      ],
+      "default": null
+    },
+    {
+      "name": "created_at",
+      "type": "string"
+    },
+    {
+      "name": "updated_at",
+      "type": "string"
+    },
+    {
+      "name": "index",
+      "type": "string"
+    },
+    {
+      "name": "store_id",
+      "type": "string"
+    },
+    {
+      "name": "tags",
+      "default": null,
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": "string"
+        }
+      ]
+    },
+    {
+      "name": "images",
+      "default": null,
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": {
+            "name": "ImageAvro",
+            "type": "record",
+            "fields": [
+              {
+                "name": "url",
+                "type": "string"
+              },
+              {
+                "name": "alt",
+                "type": [
+                  "null",
+                  "string"
+                ],
+                "default": null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+server:
+  port: 9195
+
+spring:
+  docker:
+    compose:
+      enabled: false
+
+kafka:
+  bootstrap-servers: ${BOOTSTRAP_SERVERS}
+  schema-registry-url: ${SCHEMA_REGISTRY_URL}
+  security-protocol: SASL_SSL
+  sasl-mechanism: PLAIN
+  sasl-jaas-config: org.apache.kafka.common.security.plain.PlainLoginModule required username="producer" password="prod-secret";
+  ssl-truststore-password: qwerty
+  # producer
+  product-event:
+    topic: products
+    acks: "all"
+    retries: 3
+    retry-backoff-ms: 1000
+    enable-idempotence: true
+
+shop-api:
+  data-file-path: shop-api/data/products.json

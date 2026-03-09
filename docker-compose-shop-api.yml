@@ -1,0 +1,18 @@
+version: '3.8'
+
+networks:
+  kafka-net:
+    driver: bridge
+    name: kafka-cluster-network
+
+services:
+  shop-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.shop
+    platform: linux/arm64
+    networks:
+      - kafka-net
+    environment:
+      BOOTSTRAP_SERVERS: kafka1:19092,kafka2:19093
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
