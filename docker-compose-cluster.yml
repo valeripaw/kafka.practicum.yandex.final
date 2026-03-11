@@ -17,7 +17,8 @@ x-schema-registry-common-env: &schema-registry-common-env
     password="admin-secret"
     user_admin="admin-secret"
     user_producer="prod-secret"
-    user_consumer="cons-secret";
+    user_consumer="cons-secret"
+    user_kafkaconnect="kafkaconnect-secret";
   SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.jks
   SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: qwerty
 
@@ -48,10 +49,32 @@ x-kafka-common-env: &kafka-common-env
     password="admin-secret"
     user_admin="admin-secret"
     user_producer="prod-secret"
-    user_consumer="cons-secret";
+    user_consumer="cons-secret"
+    user_kafkaconnect="kafkaconnect-secret";
   KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka_server_jaas.conf"
 
 services:
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    hostname: postgres
+    platform: linux/arm64
+    networks:
+      - kafka-net-1
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: kafka
+      POSTGRES_USER: kafka
+      POSTGRES_PASSWORD: kafka
+    volumes:
+      - ./common/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: >
+      postgres
+      -c wal_level=logical
+      -c max_wal_senders=10
+      -c max_replication_slots=10
 
 ############################
 # KAFKA CLUSTER 1
@@ -124,6 +147,7 @@ services:
     image: confluentinc/cp-schema-registry
     container_name: schema-registry1
     platform: linux/arm64
+    hostname: schema-registry1
     networks:
       - kafka-net-1
     ports:
@@ -139,88 +163,119 @@ services:
     volumes:
       - ./common/ca:/etc/kafka/secrets
 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    platform: linux/arm64
+    networks:
+      - kafka-net-1
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka1-1
+      - kafka1-2
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:19092,kafka2:19093
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: PLAIN
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: >
+        org.apache.kafka.common.security.plain.PlainLoginModule required
+        username="admin"
+        password="admin-secret"
+        user_admin="admin-secret"
+        user_producer="prod-secret"
+        user_consumer="cons-secret"
+        user_kafkaconnect="kafkaconnect-secret";
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/truststore.jks"
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "qwerty"
+      KAFKA_CLUSTERS_0_READONLY_MODE: "false"
+    volumes:
+      - ./common/ca:/etc/kafka/secrets
+
 ############################
 # KAFKA CLUSTER 2
 # bootstrap servers:
 # kafka3:19094,kafka4:19095
 ############################
 
-  zookeeper2:
-    image: confluentinc/cp-zookeeper:7.6.0
-    container_name: zookeeper2
-    platform: linux/arm64
-    networks:
-      - kafka-net-2
-    environment:
-      ZOOKEEPER_SERVER_ID: 1
-      ZOOKEEPER_CLIENT_PORT: 2182
-      ZOOKEEPER_TICK_TIME: 2000
-      KAFKA_OPTS: >-
-        -Djava.security.auth.login.config=/etc/zookeeper/secrets/zookeeper.sasl.jaas.conf
-        -Dzookeeper.authProvider.sasl=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
-        -Dzookeeper.allowSaslFailedClients=false
-        -Dzookeeper.requireClientAuthScheme=sasl
-    ports:
-      - "2182:2182"
-    volumes:
-      - ./common/zookeeper.sasl.jaas.conf:/etc/zookeeper/secrets/zookeeper.sasl.jaas.conf
-  kafka2-1:
-    image: confluentinc/cp-kafka:7.6.0
-    container_name: kafka2-1
-    platform: linux/arm64
-    hostname: kafka3
-    depends_on:
-      - zookeeper2
-    networks:
-      - kafka-net-2
-    ports:
-      - "9094:9094"
-    environment:
-      <<: *kafka-common-env
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper2:2182
-      KAFKA_BROKER_ID: 1
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19094,EXTERNAL://0.0.0.0:9094
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:19094,EXTERNAL://localhost:9094
-      # Репликация
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-    volumes:
-      - ./common/kafka3:/etc/kafka/secrets
-  kafka2-2:
-    image: confluentinc/cp-kafka:7.6.0
-    container_name: kafka2-2
-    platform: linux/arm64
-    hostname: kafka4
-    depends_on:
-      - zookeeper2
-    networks:
-      - kafka-net-2
-    ports:
-      - "9095:9095"
-    environment:
-      <<: *kafka-common-env
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper2:2182
-      KAFKA_BROKER_ID: 2
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19095,EXTERNAL://0.0.0.0:9095
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka4:19095,EXTERNAL://localhost:9095
-    volumes:
-      - ./common/kafka4:/etc/kafka/secrets
-  schema-registry2:
-    image: confluentinc/cp-schema-registry
-    container_name: schema-registry2
-    platform: linux/arm64
-    networks:
-      - kafka-net-2
-    ports:
-      - "8079:8079"
-    depends_on:
-      - kafka2-1
-      - kafka2-2
-    environment:
-      <<: *schema-registry-common-env
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: SASL_SSL://kafka3:19094,SASL_SSL://kafka4:19095
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry2
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8079
-    volumes:
-      - ./common/ca:/etc/kafka/secrets
+#  zookeeper2:
+#    image: confluentinc/cp-zookeeper:7.6.0
+#    container_name: zookeeper2
+#    platform: linux/arm64
+#    networks:
+#      - kafka-net-2
+#    environment:
+#      ZOOKEEPER_SERVER_ID: 1
+#      ZOOKEEPER_CLIENT_PORT: 2182
+#      ZOOKEEPER_TICK_TIME: 2000
+#      KAFKA_OPTS: >-
+#        -Djava.security.auth.login.config=/etc/zookeeper/secrets/zookeeper.sasl.jaas.conf
+#        -Dzookeeper.authProvider.sasl=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+#        -Dzookeeper.allowSaslFailedClients=false
+#        -Dzookeeper.requireClientAuthScheme=sasl
+#    ports:
+#      - "2182:2182"
+#    volumes:
+#      - ./common/zookeeper.sasl.jaas.conf:/etc/zookeeper/secrets/zookeeper.sasl.jaas.conf
+#  kafka2-1:
+#    image: confluentinc/cp-kafka:7.6.0
+#    container_name: kafka2-1
+#    platform: linux/arm64
+#    hostname: kafka3
+#    depends_on:
+#      - zookeeper2
+#    networks:
+#      - kafka-net-2
+#    ports:
+#      - "9094:9094"
+#    environment:
+#      <<: *kafka-common-env
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper2:2182
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19094,EXTERNAL://0.0.0.0:9094
+#      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:19094,EXTERNAL://localhost:9094
+#      # Репликация
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+#    volumes:
+#      - ./common/kafka3:/etc/kafka/secrets
+#  kafka2-2:
+#    image: confluentinc/cp-kafka:7.6.0
+#    container_name: kafka2-2
+#    platform: linux/arm64
+#    hostname: kafka4
+#    depends_on:
+#      - zookeeper2
+#    networks:
+#      - kafka-net-2
+#    ports:
+#      - "9095:9095"
+#    environment:
+#      <<: *kafka-common-env
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper2:2182
+#      KAFKA_BROKER_ID: 2
+#      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19095,EXTERNAL://0.0.0.0:9095
+#      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka4:19095,EXTERNAL://localhost:9095
+#    volumes:
+#      - ./common/kafka4:/etc/kafka/secrets
+#  schema-registry2:
+#    image: confluentinc/cp-schema-registry
+#    container_name: schema-registry2
+#    platform: linux/arm64
+#    networks:
+#      - kafka-net-2
+#    ports:
+#      - "8079:8079"
+#    depends_on:
+#      - kafka2-1
+#      - kafka2-2
+#    environment:
+#      <<: *schema-registry-common-env
+#      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: SASL_SSL://kafka3:19094,SASL_SSL://kafka4:19095
+#      SCHEMA_REGISTRY_HOST_NAME: schema-registry2
+#      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8079
+#    volumes:
+#      - ./common/ca:/etc/kafka/secrets

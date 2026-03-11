@@ -3,17 +3,14 @@ package ru.valeripaw.kafka;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.kafka.annotation.EnableKafkaStreams;
 import ru.valeripaw.kafka.properties.KafkaProperties;
-import ru.valeripaw.kafka.properties.ShopApiProperties;
 
-@EnableKafkaStreams
 @SpringBootApplication
-@EnableConfigurationProperties({KafkaProperties.class, ShopApiProperties.class})
-public class ShopApiApplication {
+@EnableConfigurationProperties({KafkaProperties.class})
+public class ClientApiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ShopApiApplication.class, args);
+        SpringApplication.run(ClientApiApplication.class, args);
     }
 
 }

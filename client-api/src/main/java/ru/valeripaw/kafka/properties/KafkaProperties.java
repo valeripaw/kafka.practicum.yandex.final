@@ -38,14 +38,12 @@ public class KafkaProperties {
 
     private String bootstrapServers;
     private String schemaRegistryUrl;
-    private String streamsApplicationId;
     private String securityProtocol;
     private String saslMechanism;
     private String saslJaasConfig;
     private String sslTruststorePassword;
 
     @NestedConfigurationProperty
-    private ProducerProperties productEvent;
-    @NestedConfigurationProperty
-    private ProducerProperties allowedProductsEvent;
+    private ProducerProperties clientRequestsEvent;
+
 }

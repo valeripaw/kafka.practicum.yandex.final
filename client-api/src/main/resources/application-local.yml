@@ -3,7 +3,7 @@ spring:
     compose:
       enabled: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/shop_db
+    url: jdbc:postgresql://localhost:5432/client_db
 
 kafka:
   # кластер №1

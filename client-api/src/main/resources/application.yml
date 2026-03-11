@@ -1,14 +1,14 @@
 server:
-  port: 9195
+  port: 9197
 
 spring:
   docker:
     compose:
       enabled: false
   datasource:
-    url: ${SHOP_DB_URL}
-    username: shop_user
-    password: shop_pass
+    url: ${CLIENT_DB_URL}
+    username: client_user
+    password: client_pass
 
 kafka:
   bootstrap-servers: ${BOOTSTRAP_SERVERS}
@@ -17,21 +17,10 @@ kafka:
   sasl-mechanism: PLAIN
   sasl-jaas-config: org.apache.kafka.common.security.plain.PlainLoginModule required username="producer" password="prod-secret";
   ssl-truststore-password: qwerty
-  streams-application-id: shop-api-service
   # producer
-  product-event:
-    topic: products
+  client-requests-event:
+    topic: client-requests
     acks: "all"
     retries: 3
     retry-backoff-ms: 1000
     enable-idempotence: true
-  allowed-products-event:
-    topic: allowed-products
-    acks: "all"
-    retries: 3
-    retry-backoff-ms: 1000
-    enable-idempotence: true
-
-shop-api:
-  data-file-path: shop-api/data/products.json
-  banned-categories: Транспорт,Умный дом

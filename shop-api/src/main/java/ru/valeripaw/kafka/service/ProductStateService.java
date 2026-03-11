@@ -1,5 +1,6 @@
 package ru.valeripaw.kafka.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.valeripaw.kafka.dto.ProductAvro;
 
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@RequiredArgsConstructor
 public class ProductStateService {
 
     private final Map<String, String> productVersions = new ConcurrentHashMap<>();
