@@ -1,0 +1,32 @@
+[req]
+prompt = no
+distinguished_name = dn
+default_md = sha256
+default_bits = 4096
+req_extensions = v3_req
+
+[req_distinguished_name]
+CN=kafka3
+
+[ dn ]
+countryName = RU
+organizationName = Yandex
+organizationalUnitName = Practice
+localityName = Samara
+commonName = kafka-3
+
+[ v3_ca ]
+subjectKeyIdentifier = hash
+basicConstraints = critical,CA:true
+authorityKeyIdentifier = keyid:always,issuer:always
+keyUsage = critical,keyCertSign,cRLSign
+
+[v3_req]
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth, clientAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = kafka3
+DNS.2 = localhost
+IP.1 = 127.0.0.1
