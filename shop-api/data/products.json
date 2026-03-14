@@ -34,5 +34,415 @@
     "updated_at": "2023-10-10T15:30:00Z",
     "index": "products",
     "store_id": "store_001"
+  },
+  {
+    "product_id": "12346",
+    "name": "Наушники SoundPro",
+    "description": "Беспроводные наушники с шумоподавлением и высоким качеством звука.",
+    "price": {
+      "amount": 3499.99,
+      "currency": "RUB"
+    },
+    "category": "Электроника",
+    "brand": "SoundPro",
+    "stock": {
+      "available": 80,
+      "reserved": 10
+    },
+    "sku": "SP-2024",
+    "tags": [
+      "наушники",
+      "беспроводные",
+      "аудио"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product2.jpg",
+        "alt": "Наушники SoundPro - вид спереди"
+      },
+      {
+        "url": "https://example.com/images/product2_case.jpg",
+        "alt": "Наушники SoundPro в чехле"
+      }
+    ],
+    "specifications": {
+      "weight": "25g",
+      "dimensions": "50mm x 40mm x 25mm",
+      "battery_life": "20 hours",
+      "water_resistance": "IPX5"
+    },
+    "created_at": "2023-10-02T10:15:00Z",
+    "updated_at": "2023-10-11T09:45:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12347",
+    "name": "Планшет TabMax",
+    "description": "Мощный планшет с 10-дюймовым экраном и поддержкой стилуса.",
+    "price": {
+      "amount": 12999.99,
+      "currency": "RUB"
+    },
+    "category": "Электроника",
+    "brand": "TabMax",
+    "stock": {
+      "available": 45,
+      "reserved": 5
+    },
+    "sku": "TM-10X",
+    "tags": [
+      "планшет",
+      "стилус",
+      "мультимедиа"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product3.jpg",
+        "alt": "Планшет TabMax - вид спереди"
+      },
+      {
+        "url": "https://example.com/images/product3_stylus.jpg",
+        "alt": "Планшет TabMax со стилусом"
+      }
+    ],
+    "specifications": {
+      "weight": "480g",
+      "dimensions": "240mm x 160mm x 7mm",
+      "battery_life": "12 hours",
+      "water_resistance": "None"
+    },
+    "created_at": "2023-10-03T14:20:00Z",
+    "updated_at": "2023-10-12T11:00:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12348",
+    "name": "Умная колонка HomeVoice",
+    "description": "Колонка с голосовым помощником, управлением умным домом и потоковым аудио.",
+    "price": {
+      "amount": 5999.99,
+      "currency": "RUB"
+    },
+    "category": "Электроника",
+    "brand": "HomeVoice",
+    "stock": {
+      "available": 120,
+      "reserved": 15
+    },
+    "sku": "HV-001",
+    "tags": [
+      "колонка",
+      "умный дом",
+      "голосовой помощник"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product4.jpg",
+        "alt": "Умная колонка HomeVoice - вид спереди"
+      },
+      {
+        "url": "https://example.com/images/product4_home.jpg",
+        "alt": "Умная колонка HomeVoice в интерьере"
+      }
+    ],
+    "specifications": {
+      "weight": "600g",
+      "dimensions": "150mm x 100mm x 100mm",
+      "battery_life": "Not applicable",
+      "water_resistance": "None"
+    },
+    "created_at": "2023-10-04T08:30:00Z",
+    "updated_at": "2023-10-13T16:20:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12349",
+    "name": "Электросамокат CityGlide",
+    "description": "Компактный электросамокат для городских поездок с дальностью до 30 км.",
+    "price": {
+      "amount": 24999.99,
+      "currency": "RUB"
+    },
+    "category": "Транспорт",
+    "brand": "CityGlide",
+    "stock": {
+      "available": 30,
+      "reserved": 8
+    },
+    "sku": "CG-30X",
+    "tags": [
+      "самокат",
+      "электротранспорт",
+      "город"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product5.jpg",
+        "alt": "Электросамокат CityGlide - вид сбоку"
+      },
+      {
+        "url": "https://example.com/images/product5_folded.jpg",
+        "alt": "Сложенный электросамокат CityGlide"
+      }
+    ],
+    "specifications": {
+      "weight": "12kg",
+      "dimensions": "1100mm x 450mm x 1200mm",
+      "battery_life": "30 km",
+      "water_resistance": "IP54"
+    },
+    "created_at": "2023-10-05T13:40:00Z",
+    "updated_at": "2023-10-14T10:10:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12350",
+    "name": "Фитнес-браслет FitBand",
+    "description": "Браслет для отслеживания активности, сна и пульса.",
+    "price": {
+      "amount": 1999.99,
+      "currency": "RUB"
+    },
+    "category": "Электроника",
+    "brand": "FitBand",
+    "stock": {
+      "available": 200,
+      "reserved": 25
+    },
+    "sku": "FB-001",
+    "tags": [
+      "фитнес",
+      "браслет",
+      "здоровье"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product6.jpg",
+        "alt": "Фитнес-браслет FitBand - на руке"
+      },
+      {
+        "url": "https://example.com/images/product6_screen.jpg",
+        "alt": "Экран фитнес-браслета FitBand"
+      }
+    ],
+    "specifications": {
+      "weight": "20g",
+      "dimensions": "240mm x 18mm x 12mm",
+      "battery_life": "7 days",
+      "water_resistance": "IP68"
+    },
+    "created_at": "2023-10-06T17:50:00Z",
+    "updated_at": "2023-10-15T14:30:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12351",
+    "name": "Портативная колонка MiniBoom",
+    "description": "Компактная колонка с мощным звуком и защитой от воды.",
+    "price": {
+      "amount": 2799.99,
+      "currency": "RUB"
+    },
+    "category": "Электроника",
+    "brand": "MiniBoom",
+    "stock": {
+      "available": 90,
+      "reserved": 12
+    },
+    "sku": "MB-002",
+    "tags": [
+      "колонка",
+      "портативная",
+      "водонепроницаемая"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product7.jpg",
+        "alt": "Портативная колонка MiniBoom - вид сбоку"
+      },
+      {
+        "url": "https://example.com/images/product7_outdoor.jpg",
+        "alt": "Колонка MiniBoom на природе"
+      }
+    ],
+    "specifications": {
+      "weight": "300g",
+      "dimensions": "180mm x 60mm x 60mm",
+      "battery_life": "15 hours",
+      "water_resistance": "IPX7"
+    },
+    "created_at": "2023-10-07T12:00:00Z",
+    "updated_at": "2023-10-16T08:20:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12352",
+    "name": "Умная лампа LightIQ",
+    "description": "Цветная умная лампа с управлением через приложение и голосовые команды.",
+    "price": {
+      "amount": 1499.99,
+      "currency": "RUB"
+    },
+    "category": "Умный дом",
+    "brand": "LightIQ",
+    "stock": {
+      "available": 130,
+      "reserved": 18
+    },
+    "sku": "LI-001",
+    "tags": [
+      "лампа",
+      "умный дом",
+      "RGB"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product8.jpg",
+        "alt": "Умная лампа LightIQ в интерьере"
+      },
+      {
+        "url": "https://example.com/images/product8_app.jpg",
+        "alt": "Управление лампой через приложение"
+      }
+    ],
+    "specifications": {
+      "weight": "150g",
+      "dimensions": "E27 base, 120mm height",
+      "battery_life": "Not applicable",
+      "water_resistance": "None"
+    },
+    "created_at": "2023-10-08T11:10:00Z",
+    "updated_at": "2023-10-17T13:40:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12353",
+    "name": "Пауэрбанк PowerMax 10000",
+    "description": "Ёмкий пауэрбанк на 10000 мА·ч с быстрой зарядкой и двумя USB-портами.",
+    "price": {
+      "amount": 1899.99,
+      "currency": "RUB"
+    },
+    "category": "Аксессуары",
+    "brand": "PowerMax",
+    "stock": {
+      "available": 170,
+      "reserved": 22
+    },
+    "sku": "PM-10K",
+    "tags": [
+      "пауэрбанк",
+      "зарядка",
+      "портативное питание"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product9.jpg",
+        "alt": "Пауэрбанк PowerMax - вид спереди"
+      },
+      {
+        "url": "https://example.com/images/product9_charging.jpg",
+        "alt": "Пауэрбанк заряжает телефон"
+      }
+    ],
+    "specifications": {
+      "weight": "220g",
+      "dimensions": "150mm x 70mm x 20mm",
+      "battery_life": "10000 mAh",
+      "water_resistance": "None"
+    },
+    "created_at": "2023-10-09T09:05:00Z",
+    "updated_at": "2023-10-18T10:50:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12354",
+    "name": "Электронная книга ReadEra",
+    "description": "Легкая электронная книга с антибликовым экраном и подсветкой.",
+    "price": {
+      "amount": 6999.99,
+      "currency": "RUB"
+    },
+    "category": "Электроника",
+    "brand": "ReadEra",
+    "stock": {
+      "available": 60,
+      "reserved": 7
+    },
+    "sku": "RE-001",
+    "tags": [
+      "электронная книга",
+      "читалка",
+      "e-book"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product10.jpg",
+        "alt": "Электронная книга ReadEra в руке"
+      },
+      {
+        "url": "https://example.com/images/product10_screen.jpg",
+        "alt": "Экран электронной книги ReadEra"
+      }
+    ],
+    "specifications": {
+      "weight": "180g",
+      "dimensions": "160mm x 110mm x 8mm",
+      "battery_life": "30 days",
+      "water_resistance": "IPX8"
+    },
+    "created_at": "2023-10-10T14:30:00Z",
+    "updated_at": "2023-10-19T12:15:00Z",
+    "index": "products",
+    "store_id": "store_001"
+  },
+  {
+    "product_id": "12355",
+    "name": "Умные весы HealthScale Pro",
+    "description": "Умные напольные весы с анализом состава тела: жир, мышцы, вода и кости.",
+    "price": {
+      "amount": 3999.99,
+      "currency": "RUB"
+    },
+    "category": "Здоровье",
+    "brand": "HealthScale",
+    "stock": {
+      "available": 50,
+      "reserved": 5
+    },
+    "sku": "HS-PRO",
+    "tags": [
+      "весы",
+      "здоровье",
+      "умные устройства"
+    ],
+    "images": [
+      {
+        "url": "https://example.com/images/product11.jpg",
+        "alt": "Умные весы HealthScale Pro - вид сверху"
+      },
+      {
+        "url": "https://example.com/images/product11_app.jpg",
+        "alt": "Данные с весов в приложении"
+      }
+    ],
+    "specifications": {
+      "weight": "1.8kg",
+      "dimensions": "300mm x 300mm x 20mm",
+      "battery_life": "12 months",
+      "water_resistance": "None"
+    },
+    "created_at": "2023-10-11T16:40:00Z",
+    "updated_at": "2023-10-20T14:00:00Z",
+    "index": "products",
+    "store_id": "store_001"
   }
 ]

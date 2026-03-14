@@ -28,7 +28,7 @@ public class ProductProducer {
 
     private void getResult(CompletableFuture<SendResult<String, ProductAvro>> completableFuture) throws ExecutionException, InterruptedException {
         RecordMetadata recordMetadata = completableFuture.get().getRecordMetadata();
-        log.info("Metadata: {}", toString(recordMetadata));
+        log.info("{}", toString(recordMetadata));
     }
 
     private String toString(RecordMetadata recordMetadata) {

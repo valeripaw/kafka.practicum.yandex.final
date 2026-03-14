@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "ClientRequestAvro",
+  "namespace": "ru.valeripaw.kafka.dto",
+  "version": "1",
+  "fields": [
+    {
+      "name": "type",
+      "type": "string"
+    },
+    {
+      "name": "query",
+      "type": "string"
+    },
+    {
+      "name": "timestamp",
+      "type": "long"
+    }
+  ]
+}

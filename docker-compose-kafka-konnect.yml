@@ -1,0 +1,58 @@
+version: '3.8'
+
+networks:
+  kafka-net-1:
+    driver: bridge
+    name: kafka-cluster-network-1
+
+services:
+
+  kafka-connect:
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka.connect
+    container_name: kafka-connect
+    networks:
+      - kafka-net-1
+    ports:
+      - "8083:8083"
+      - "9404:9404"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka1:19092,kafka2:19093
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: kafka-connect
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_SCHEMA_REGISTRY_URL: http://schema-registry1:8081
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry1:8081
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+
+      CONNECT_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_SASL_MECHANISM: PLAIN
+      CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="kafkaconnect" password="kafkaconnect-secret";
+      CONNECT_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.jks
+      CONNECT_SSL_TRUSTSTORE_PASSWORD: qwerty
+
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="kafkaconnect" password="kafkaconnect-secret";
+      CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.jks
+      CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: qwerty
+
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_CONSUMER_SASL_MECHANISM: PLAIN
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="kafkaconnect" password="kafkaconnect-secret";
+      CONNECT_CONSUMER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.jks
+      CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: qwerty
+    volumes:
+      - ./common/ca:/etc/kafka/secrets

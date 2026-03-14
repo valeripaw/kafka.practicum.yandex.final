@@ -21,9 +21,11 @@ public class ProductEventService {
         try {
             List<ProductAvro> products = productFileReader.read();
             for (ProductAvro product : products) {
-                if (productStateService.isUpdated(product)) {
+                // можно проверять товары по дате обновления, что бы не слать одни и те же, а отправлять только измененные товары,
+                // но при тестировании это оказалось неудобным, поэтому закомментировала
+                //if (productStateService.isUpdated(product)) {
                     productProducer.send(product);
-                }
+                //}
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
