@@ -13,7 +13,7 @@
       "type": "string"
     },
     {
-      "name": "timestamp",
+      "name": "created_at",
       "type": "long"
     }
   ]

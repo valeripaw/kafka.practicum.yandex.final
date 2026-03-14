@@ -5,10 +5,6 @@ spring:
   docker:
     compose:
       enabled: false
-  datasource:
-    url: ${SHOP_DB_URL}
-    username: shop_user
-    password: shop_pass
 
 kafka:
   bootstrap-servers: ${BOOTSTRAP_SERVERS}
@@ -33,5 +29,5 @@ kafka:
     enable-idempotence: true
 
 shop-api:
-  data-file-path: shop-api/data/products.json
+  data-file-path: ${DATA_FILE_PATH}
   banned-categories: Транспорт,Умный дом

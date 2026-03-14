@@ -30,7 +30,7 @@ public class ClientRequestProducer {
         ClientRequestAvro clientRequest = ClientRequestAvro.newBuilder()
                 .setType("SEARCH_PRODUCT_REQUEST")
                 .setQuery(query)
-                .setTimestamp(Instant.now().toEpochMilli())
+                .setCreatedAt(Instant.now().toEpochMilli())
                 .build();
         send(clientRequest);
     }
@@ -43,7 +43,7 @@ public class ClientRequestProducer {
         ClientRequestAvro clientRequest = ClientRequestAvro.newBuilder()
                 .setType("RECOMMENDATION_REQUEST")
                 .setQuery(query)
-                .setTimestamp(Instant.now().toEpochMilli())
+                .setCreatedAt(Instant.now().toEpochMilli())
                 .build();
         send(clientRequest);
     }
@@ -56,7 +56,7 @@ public class ClientRequestProducer {
 
     private void getResult(CompletableFuture<SendResult<String, ClientRequestAvro>> completableFuture) throws ExecutionException, InterruptedException {
         RecordMetadata recordMetadata = completableFuture.get().getRecordMetadata();
-        log.info("Metadata: {}", toString(recordMetadata));
+        log.info("{}", toString(recordMetadata));
     }
 
     private String toString(RecordMetadata recordMetadata) {
