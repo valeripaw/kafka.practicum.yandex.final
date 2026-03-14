@@ -2,10 +2,11 @@ spring:
   docker:
     compose:
       enabled: false
-  datasource:
-    url: jdbc:postgresql://localhost:5432/shop_db
 
 kafka:
   # кластер №1
   bootstrap-servers: localhost:9092,localhost:9093
   schema-registry-url: http://localhost:8081
+
+shop-api:
+  data-file-path: shop-api/data/products.json

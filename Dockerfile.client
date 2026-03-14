@@ -10,15 +10,15 @@ COPY client-api/pom.xml client-api/pom.xml
 
 COPY . .
 
-RUN mvn -pl shop-api -am clean package -DskipTests
+RUN mvn -pl client-api -am clean package -DskipTests
 
 # ---------- runtime ----------
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY --from=builder /build/shop-api/target/*.jar app.jar
+COPY --from=builder /build/client-api/target/*.jar app.jar
 
-EXPOSE 9195
+EXPOSE 9197
 
 ENTRYPOINT ["java","-jar","app.jar"]

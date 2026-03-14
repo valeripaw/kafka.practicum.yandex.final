@@ -1,7 +1,7 @@
 # План развертывания
-1. Запуск кластера (zookeeper, два кафка брокера, postgres).
+1. Запуск кластера (zookeeper, два кафка брокера, postgres, kafka-ui).
 2. Создание топиков и заздача прав на них и на группы.
-3. Регистрация схем.
+3. Регистрация схем в Schema Registry.
 4. Запуск kafka connect.
 5. Запуск `SHOP API` и `CLIENT API`.
 
@@ -18,7 +18,9 @@ docker-compose -f docker-compose-cluster.yml up -d
 Будут созданы:
 - два кафка кластера: условно №1 и №2.             
 Кластер №1 - кластер, к которому будут подключаться `SHOP API` и `CLIENT API`.
-- postgres с двумя базами `shop_db` и `client_db`. В базе `shop_db` будет создана таблица `product`.
+- postgres с двумя базами `shop_db` и `client_db`. 
+  В базе `shop_db` будет создана таблица `product`.
+  В базе `client_db` будет создана таблица `client_request`.
 
 # Топики и группы
 
@@ -237,7 +239,7 @@ curl -X POST http://localhost:8081/subjects/products-value/versions \
 curl -X POST http://localhost:8081/subjects/client-requests-value/versions \
 -H "Content-Type: application/vnd.schemaregistry.v1+json" \
 -d '{
-  "schema": "{\"type\": \"record\", \"name\": \"ClientRequestAvro\", \"namespace\": \"ru.valeripaw.kafka.dto\", \"version\": \"1\", \"fields\": [{\"name\": \"type\", \"type\": \"string\"}, {\"name\": \"query\", \"type\": \"string\"}, {\"name\": \"timestamp\", \"type\": \"long\"}]}"
+  "schema": "{\"type\": \"record\", \"name\": \"ClientRequestAvro\", \"namespace\": \"ru.valeripaw.kafka.dto\", \"version\": \"1\", \"fields\": [{\"name\": \"type\", \"type\": \"string\"}, {\"name\": \"query\", \"type\": \"string\"}, {\"name\": \"created_at\", \"type\": \"long\"}]}"
 }'
 ```
 
@@ -257,7 +259,7 @@ curl -X POST http://localhost:8081/subjects/client-requests-value/versions \
 {
   "type": "SEARCH_PRODUCT_REQUEST",
   "query": "Умные часы",
-  "timestamp": 1719991111
+  "created_at": 1719991111
 }
 ```
 - `"type": "SEARCH_PRODUCT_REQUEST"` - для поиска, для рекомендаций - `"type": "RECOMMENDATION_REQUEST"`.
@@ -312,6 +314,12 @@ curl -X DELETE http://localhost:8083/connectors/allowed-products-postgres-sink
 ```
 
 # SHOP API
+Запустите `SHOP API` командой:
+
+```shell
+docker-compose -f docker-compose-shop-api.yml up -d
+```
+
 ```
 products.json
     │
@@ -343,24 +351,50 @@ Kafka Connect JDBC Sink
 Postgres: product table
 ```
 
-Приложение слушает изменения в файле `products.json` и смотрит на значение в `updated_at` у каждого продукта:
-если оно не изменилось по сравнению с предыдущей версией, сообщение в кафку отправлено не будет.                  
+Приложение слушает изменения в файле `products.json`.                     
 Все продукты из файла `products.json` попадают в топик `products`. Далее продукты из этого топика проходят фильтрацию на
-запрещенные и попадают в топик `allowed-products`, и уже из этого топика записываются в бд в таблицу `product`.
+запрещенные и попадают в топик `allowed-products`, и уже из топика `allowed-products` записываются в бд в таблицу `product`.
 
 # CLIENT API
+Запустите `CLIENT API` командой:
 
-todo
-
-## Запуск
-
-Запустите kafka кластер командой:
-
-```
-docker-compose -f docker-compose-shop-api.yml up -d
+```shell
+docker-compose -f docker-compose-client-api.yml up -d
 ```
 
-Подождите 1–2 минуты, пока все сервисы запустятся.
+```
+REST or CLI
+    │
+    ▼
+Postgres: client_request table
+    │
+    ▼
+Kafka topic: client-requests
+```
+
+Приложение реализует команды:
+- поиск информации о товаре по его имени
+- получение персонализированных рекомендаций
+  двумя способами: через REST и через терминал (использовать терминал в контейнерах не очень удобно, нужно конфигурировать отдельно, поэтому продублировала по ресту).
+
+По REST можно отправить запросы:
+поиск информации о товаре по его имени
+```
+curl --get \
+  --data-urlencode "name=Планшет TabMax" \
+  http://localhost:9197/api/product/search
+```
+
+получение персонализированных рекомендаций
+```
+curl --get \
+  --data-urlencode "category=Электроника" \
+  http://localhost:9197/api/product/recommendation
+```
+
+
+Запросы сохраняются в кластере №1 в топик `client-requests`, а так же в бд `client_db` в таблицу `client_request`.
+Продукты в ответе берутся из бд `shop_db` из таблицы `product`.
 
 # Остановка кластера
 

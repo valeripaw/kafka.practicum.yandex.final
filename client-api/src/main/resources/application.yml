@@ -6,9 +6,27 @@ spring:
     compose:
       enabled: false
   datasource:
-    url: ${CLIENT_DB_URL}
-    username: client_user
-    password: client_pass
+    shop:
+      url: ${SHOP_DB_URL}
+      username: shop_user
+      password: shop_pass
+      driver-class-name: org.postgresql.Driver
+    client:
+      url: ${CLIENT_DB_URL}
+      username: client_user
+      password: client_pass
+      driver-class-name: org.postgresql.Driver
+  jpa:
+    shop:
+      hibernate:
+        ddl-auto: validate
+      show-sql: true
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+    client:
+      hibernate:
+        ddl-auto: validate
+      show-sql: true
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 kafka:
   bootstrap-servers: ${BOOTSTRAP_SERVERS}
@@ -24,3 +42,6 @@ kafka:
     retries: 3
     retry-backoff-ms: 1000
     enable-idempotence: true
+
+client-api:
+  use-command-line: ${USE_COMMAND_LINE}

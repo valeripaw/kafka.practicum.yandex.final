@@ -35,3 +35,14 @@ create table if not exists public.product (
 );
 
 alter table public.product owner to shop_user;
+
+\connect client_db
+
+create table if not exists public.client_request (
+    id bigserial primary key,
+    type text,
+    query text,
+    created_at timestamp
+);
+
+alter table public.client_request owner to client_user;

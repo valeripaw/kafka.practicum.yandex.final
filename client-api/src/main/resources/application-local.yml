@@ -3,9 +3,15 @@ spring:
     compose:
       enabled: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/client_db
+    shop:
+      url: jdbc:postgresql://localhost:5432/shop_db
+    client:
+      url: jdbc:postgresql://localhost:5432/client_db
 
 kafka:
   # кластер №1
   bootstrap-servers: localhost:9092,localhost:9093
   schema-registry-url: http://localhost:8081
+
+client-api:
+  use-command-line: true

@@ -70,13 +70,6 @@
 			<version>8.1.1</version>
 			<scope>compile</scope>
 		</dependency>
-
-		<!-- TEST -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 </project>

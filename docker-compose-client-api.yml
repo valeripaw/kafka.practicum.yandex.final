@@ -6,19 +6,19 @@ networks:
     name: kafka-cluster-network-1
 
 services:
-  shop-api:
+  client-api:
     build:
       context: .
-      dockerfile: Dockerfile.shop
+      dockerfile: Dockerfile.client
     platform: linux/arm64
-    container_name: shop-api
+    container_name: client-api
     ports:
-      - "9195:9195"
+      - "9197:9197"
     networks:
       - kafka-net-1
     environment:
       BOOTSTRAP_SERVERS: kafka1:19092,kafka2:19093
       SCHEMA_REGISTRY_URL: http://schema-registry1:8081
-      DATA_FILE_PATH: /opt/shop-api/data/products.json
-    volumes:
-      - ./shop-api/data:/opt/shop-api/data
+      SHOP_DB_URL: jdbc:postgresql://postgres:5432/shop_db
+      CLIENT_DB_URL: jdbc:postgresql://postgres:5432/client_db
+      USE_COMMAND_LINE: false
