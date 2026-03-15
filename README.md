@@ -1,9 +1,11 @@
 # План развертывания
-1. Запуск кластера (zookeeper, два кафка брокера, postgres, kafka-ui).
-2. Создание топиков и заздача прав на них и на группы.
-3. Регистрация схем в Schema Registry.
-4. Запуск kafka connect.
+
+1. Запуск кластера (два zookeeper'а, два кафка кластер по два кафка брокера в каждом, postgres, kafka-ui).
+2. Создание топиков и раздача прав на них и на группы.
+3. Регистрация схем в `Schema Registry`.
+4. Запуск `kafka connect`.
 5. Запуск `SHOP API` и `CLIENT API`.
+6. Запусл`MirrorMaker`.
 
 # Запуск кластера
 
@@ -16,9 +18,10 @@ docker-compose -f docker-compose-cluster.yml up -d
 Подождите 1–2 минуты, пока все сервисы запустятся.
 
 Будут созданы:
+
 - два кафка кластера: условно №1 и №2.             
-Кластер №1 - кластер, к которому будут подключаться `SHOP API` и `CLIENT API`.
-- postgres с двумя базами `shop_db` и `client_db`. 
+  Кластер №1 - кластер, к которому будут подключаться `SHOP API` и `CLIENT API`.
+- postgres с двумя базами `shop_db` и `client_db`.
   В базе `shop_db` будет создана таблица `product`.
   В базе `client_db` будет создана таблица `client_request`.
 
@@ -28,8 +31,16 @@ docker-compose -f docker-compose-cluster.yml up -d
 - `allowed-products` - топик, куда будут попадать только разрешенные продукты (`SHOP API`);
 - `client-requests` - топик для клиентских запросов (`CLIENT API`).
 
+Минимальное количество реплик для отказоустойчивости в двух брокерах (у меня в каждом кластере настроено именно
+столько) - максимум 2.
+Для синхронности нужно установить `min.insync.replicas = 2` на брокерах или `replication-factor = 2` в топиках.
+Но из-за ограничений ноута, при таких настройках у меня всё время что-то отваливается.
+Поэтому, что в docker-compose файле, что далее в топиках стоит значение 1.
+
 ## Команды
+
 Все следующие команды собраны в файл [topics.sh](topics.sh). И можно не выполнять команды по одной, а запустить скрипт:
+
 ```shell
 bash topics.sh
 ```
@@ -38,6 +49,7 @@ bash topics.sh
 <summary>Описание команд (раскрыть)</summary>
 
 Создаем топик `products` на кластере №1:
+
 ```
 docker exec kafka1-1 kafka-topics \
   --create \
@@ -49,6 +61,7 @@ docker exec kafka1-1 kafka-topics \
 ```
 
 Выдаем права продьюсеру:
+
 ```
 docker exec kafka1-1 kafka-acls \
   --bootstrap-server kafka1:19092 \
@@ -60,6 +73,7 @@ docker exec kafka1-1 kafka-acls \
 ```
 
 Создаем топик `allowed-products` на кластере №1:
+
 ```
 docker exec kafka1-1 kafka-topics \
   --create \
@@ -71,6 +85,7 @@ docker exec kafka1-1 kafka-topics \
 ```
 
 Выдаем права продьюсеру:
+
 ```
 docker exec kafka1-1 kafka-acls \
   --bootstrap-server kafka1:19092 \
@@ -82,6 +97,7 @@ docker exec kafka1-1 kafka-acls \
 ```
 
 Создаем топик `client-requests` на кластере №1:
+
 ```
 docker exec kafka1-1 kafka-topics \
   --create \
@@ -93,6 +109,7 @@ docker exec kafka1-1 kafka-topics \
 ```
 
 Выдаем права продьюсеру:
+
 ```
 docker exec kafka1-1 kafka-acls \
   --bootstrap-server kafka1:19092 \
@@ -104,9 +121,11 @@ docker exec kafka1-1 kafka-acls \
 ```
 
 ### Права для Kafka Streams
+
 Kafka Streams нужны права на группу `shop-api-service`, на чтение `products`, на запись в `allowed-products`.
 Так как я везде использую `User:producer`, то на запись в `allowed-products` права уже выданы выше. Выдаем остальные.
 На группу:
+
 ```
 docker exec kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
@@ -116,9 +135,11 @@ docker exec kafka1-1 kafka-acls \
   --operation READ \
   --group shop-api-service
 ```
+
 где `shop-api-service` задается в конфиге `SHOP API` в `kafka.streams-application-id`.
 
 На чтение `products`:
+
 ```
 docker exec kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
@@ -130,12 +151,15 @@ docker exec kafka1-1 kafka-acls \
 ```
 
 ### Права для Kafka Connect
+
 Kafka Connect использует 3 служебных топика:
+
 - connect-configs
 - connect-offsets
 - connect-status
 
 И пользователь должен иметь права:
+
 - READ
 - WRITE
 - CREATE
@@ -177,6 +201,7 @@ docker exec kafka1-1 kafka-acls \
 ```
 
 А так же права на группы `kafka-connect` и `connect-allowed-products-postgres-sink`:
+
 ```
 docker exec kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
@@ -196,6 +221,7 @@ docker exec kafka1-1 kafka-acls \
 ```
 
 И права на топик `allowed-products`:
+
 ```
 docker exec kafka1-1 kafka-acls \
   --bootstrap-server kafka1:19092 \
@@ -215,6 +241,7 @@ docker exec kafka1-1 kafka-acls \
 Схема [client.request.avsc](common%2Fsrc%2Fmain%2Favro%2Fclient.request.avsc).
 
 Регистрируем схему для топика `products` на кластере №1:
+
 ```
 curl -X POST http://localhost:8081/subjects/products-value/versions \
 -H "Content-Type: application/vnd.schemaregistry.v1+json" \
@@ -224,6 +251,7 @@ curl -X POST http://localhost:8081/subjects/products-value/versions \
 ```
 
 В ответе будет что-то похожее на:
+
 ```json
 {
   "id": 1,
@@ -235,6 +263,7 @@ curl -X POST http://localhost:8081/subjects/products-value/versions \
 ```
 
 Регистрируем схему для топика `client-requests` на кластере №1:
+
 ```
 curl -X POST http://localhost:8081/subjects/client-requests-value/versions \
 -H "Content-Type: application/vnd.schemaregistry.v1+json" \
@@ -244,6 +273,7 @@ curl -X POST http://localhost:8081/subjects/client-requests-value/versions \
 ```
 
 В ответе будет что-то похожее на:
+
 ```json
 {
   "id": 2,
@@ -255,6 +285,7 @@ curl -X POST http://localhost:8081/subjects/client-requests-value/versions \
 ```
 
 Пример сообщения для топика `client-requests`:
+
 ```json
 {
   "type": "SEARCH_PRODUCT_REQUEST",
@@ -262,9 +293,11 @@ curl -X POST http://localhost:8081/subjects/client-requests-value/versions \
   "created_at": 1719991111
 }
 ```
+
 - `"type": "SEARCH_PRODUCT_REQUEST"` - для поиска, для рекомендаций - `"type": "RECOMMENDATION_REQUEST"`.
 
 # Kafka Connect
+
 Запустите кластер командой:
 
 ```shell
@@ -273,23 +306,26 @@ docker-compose -f docker-compose-kafka-konnect.yml up -d
 
 Подождите 1–2 минуты, пока все сервисы запустятся.
 
-Конфиг [config.json](shop-api/kafka-connect/config.json).
+Конфиг [config.json](common/kafka-connect/config.json).
 
 Таблица `product` уже создана.
 
 Создание коннектора:
+
 ```
 curl -X POST http://localhost:8083/connectors \
   -H "Content-Type: application/json" \
-  --data-binary "@shop-api/kafka-connect/config.json" 
+  --data-binary "@common/kafka-connect/config.json" 
 ```
 
 Проверить статус:
+
 ```
 curl http://localhost:8083/connectors/allowed-products-postgres-sink/status
 ```
 
 В ответе должно быть что-то похожее на:
+
 ```json
 {
   "name": "allowed-products-postgres-sink",
@@ -309,11 +345,13 @@ curl http://localhost:8083/connectors/allowed-products-postgres-sink/status
 ```
 
 Если по какой-то причине коннектор нужно удалить:
+
 ```
 curl -X DELETE http://localhost:8083/connectors/allowed-products-postgres-sink
 ```
 
 # SHOP API
+
 Запустите `SHOP API` командой:
 
 ```shell
@@ -353,9 +391,11 @@ Postgres: product table
 
 Приложение слушает изменения в файле `products.json`.                     
 Все продукты из файла `products.json` попадают в топик `products`. Далее продукты из этого топика проходят фильтрацию на
-запрещенные и попадают в топик `allowed-products`, и уже из топика `allowed-products` записываются в бд в таблицу `product`.
+запрещенные и попадают в топик `allowed-products`, и уже из топика `allowed-products` записываются в бд в
+таблицу `product`.
 
 # CLIENT API
+
 Запустите `CLIENT API` командой:
 
 ```shell
@@ -373,12 +413,15 @@ Kafka topic: client-requests
 ```
 
 Приложение реализует команды:
+
 - поиск информации о товаре по его имени
 - получение персонализированных рекомендаций
-  двумя способами: через REST и через терминал (использовать терминал в контейнерах не очень удобно, нужно конфигурировать отдельно, поэтому продублировала по ресту).
+  двумя способами: через REST и через терминал (использовать терминал в контейнерах не очень удобно, нужно
+  конфигурировать отдельно, поэтому продублировала по ресту).
 
 По REST можно отправить запросы:
 поиск информации о товаре по его имени
+
 ```
 curl --get \
   --data-urlencode "name=Планшет TabMax" \
@@ -386,15 +429,66 @@ curl --get \
 ```
 
 получение персонализированных рекомендаций
+
 ```
 curl --get \
   --data-urlencode "category=Электроника" \
   http://localhost:9197/api/product/recommendation
 ```
 
-
 Запросы сохраняются в кластере №1 в топик `client-requests`, а так же в бд `client_db` в таблицу `client_request`.
 Продукты в ответе берутся из бд `shop_db` из таблицы `product`.
+
+# MirrorMaker
+
+Запустите `MirrorMaker` командой:
+
+```shell
+docker-compose -f docker-compose-mirror-maker.yml up -d
+```
+
+На кластере №2 будут созданы топики `products`, `allowed-products`, `client-requests` со всем их содержимым как в
+кластере №1.             
+А так же несколько
+служебных: `mm2-status.source.internal`, `mm2-offsets.source.internal`, `mm2-configs.source.internal`, `heartbeats`.          
+Все права `ACL` так же будут перенесены.
+
+Если `MirrorMaker` оставить запущеным, он почти в реальном времени будет переносить данные с кластера №1 на кластер №2.
+
+# Аналитическая система и HDFS
+
+Запустите `HDFS` командой:
+
+```
+docker-compose -f docker-compose-hdfs.yml up -d
+```
+
+После запуска контейнера можно воспользоваться веб-интерфейсами `Hadoop`, перейдя по адресам:
+
+- Веб-интерфейс `HDFS NameNode`: http://localhost:9870
+- Веб-интерфейс `HDFS DataNode`: http://localhost:9864
+
+```
+Kafka кластер №2: топики allowed-products и client-requests
+    │
+    ▼
+HDFS
+    │
+    ▼
+Spark аналитика
+    │
+    ▼
+рекомендации
+    │
+    ▼
+Kafka кластер №2: топик recommendations
+```
+
+Логика `analytics.py`:
+1 анализ `client-requests`;
+2 считаем популярные запросы;
+3 фильтруем `allowed-products`;
+4 формируем рекомендации.
 
 # Остановка кластера
 

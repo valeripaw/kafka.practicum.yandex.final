@@ -1,0 +1,29 @@
+version: '3.8'
+
+networks:
+  kafka-net-1:
+    driver: bridge
+    name: kafka-cluster-network-1
+  kafka-net-2:
+    driver: bridge
+    name: kafka-cluster-network-2
+
+services:
+
+  # MirrorMaker 2
+  mm2:
+    image: confluentinc/cp-kafka-connect:7.6.0
+    container_name: mirror-maker
+    hostname: mirror-maker
+    networks:
+      - kafka-net-1
+      - kafka-net-2
+    volumes:
+      - ./common/mm2:/etc/mm2
+      - ./common/ca:/etc/kafka/secrets
+    environment:
+      KAFKA_LOG4J_OPTS: "-Dlog4j.configuration=file:/etc/mm2/connect-log4j.properties"
+    command: >
+      bash -c "
+      connect-mirror-maker /etc/mm2/mm2.properties
+      "

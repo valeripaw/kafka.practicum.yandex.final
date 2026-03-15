@@ -20,7 +20,8 @@
 		<module>common</module>
 		<module>client-api</module>
 		<module>shop-api</module>
-	</modules>
+        <module>analytical-system</module>
+    </modules>
 
 	<properties>
 		<java.version>21</java.version>
