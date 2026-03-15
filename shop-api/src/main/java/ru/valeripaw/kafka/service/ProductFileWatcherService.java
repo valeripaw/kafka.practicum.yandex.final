@@ -40,8 +40,7 @@ public class ProductFileWatcherService {
             WatchService watchService = FileSystems.getDefault().newWatchService();
             directory.register(
                     watchService,
-                    StandardWatchEventKinds.ENTRY_MODIFY,
-                    StandardWatchEventKinds.ENTRY_CREATE
+                    StandardWatchEventKinds.ENTRY_MODIFY
             );
 
             while (true) {

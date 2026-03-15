@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# кластер 1
 docker exec kafka1-1 kafka-topics \
   --create \
   --topic products \
@@ -116,3 +117,44 @@ docker exec kafka1-1 kafka-acls \
   --operation READ \
   --operation DESCRIBE \
   --topic allowed-products
+
+# кластер 2
+docker exec kafka2-1 kafka-topics \
+  --create \
+  --topic recommendations \
+  --bootstrap-server kafka3:19094 \
+  --command-config /etc/kafka/secrets/admin-client-configs.conf \
+  --partitions 1 \
+  --replication-factor 1
+
+docker exec kafka2-1 kafka-acls \
+  --bootstrap-server kafka3:19094 \
+  --command-config /etc/kafka/secrets/admin-client-configs.conf \
+  --add \
+  --allow-principal User:hdfs \
+  --operation READ \
+  --topic allowed-products
+
+docker exec kafka2-1 kafka-acls \
+  --bootstrap-server kafka3:19094 \
+  --command-config /etc/kafka/secrets/admin-client-configs.conf \
+  --add \
+  --allow-principal User:hdfs \
+  --operation READ \
+  --group allowed-products.2
+
+docker exec kafka2-1 kafka-acls \
+  --bootstrap-server kafka3:19094 \
+  --command-config /etc/kafka/secrets/admin-client-configs.conf \
+  --add \
+  --allow-principal User:hdfs \
+  --operation READ \
+  --topic client-requests
+
+docker exec kafka2-1 kafka-acls \
+  --bootstrap-server kafka3:19094 \
+  --command-config /etc/kafka/secrets/admin-client-configs.conf \
+  --add \
+  --allow-principal User:hdfs \
+  --operation READ \
+  --group client-requests.2

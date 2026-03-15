@@ -1,0 +1,22 @@
+version: '3.8'
+
+networks:
+  kafka-net-2:
+    driver: bridge
+    name: kafka-cluster-network-2
+
+services:
+  analytical-system:
+    build:
+      context: .
+      dockerfile: Dockerfile.analytical.system
+    platform: linux/arm64
+    container_name: analytical-system
+    ports:
+      - "9090:9090"
+    networks:
+      - kafka-net-2
+    environment:
+      BOOTSTRAP_SERVERS: kafka3:19094,kafka4:19095
+      SCHEMA_REGISTRY_URL: http://schema-registry1:8079
+      HDFS_NAMENODE: hdfs://namenode:9000

@@ -1,0 +1,133 @@
+version: '3.8'
+
+networks:
+  kafka-net-2:
+    driver: bridge
+    name: kafka-cluster-network-2
+
+services:
+
+  namenode:
+    image: jolmedilla/hadoop-namenode:arm64
+    platform: linux/arm64
+    container_name: namenode
+    hostname: namenode
+    user: "root"
+    networks:
+      - kafka-net-2
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"   # Ограничение использования CPU
+          memory: "2g"  # Ограничение использования RAM
+    shm_size: 10G
+    ports:
+      - "9870:9870"  # HTTP-порт для Web UI HDFS NameNode
+      - "9000:9000"  # RPC порт для запросов к NameNode
+    environment:
+      HADOOP_NAMENODE_HOST: namenode
+    volumes:
+      # задаёт базовые настройки Hadoop, указывая адрес NameNode.
+      - ./common/hdfs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      # настраивает NameNode, задавая количество реплик для хранения данных и указывая локальный путь
+      # для метаданных файловой системы.
+      - ./common/hdfs/hdfs-site-namenode.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      # Скрипт для NameNode выполняет подготовку файловой системы: создаёт каталог для хранения метаданных
+      # и задаёт ему необходимые права доступа.
+      - ./common/hdfs/namenode_entrypoint.sh:/namenode_entrypoint.sh
+      - ./common/ca:/etc/kafka/secrets
+      - namenode_data:/hdfs/namenode
+    entrypoint: ["/bin/bash", "/namenode_entrypoint.sh"]
+    command: ["hdfs", "namenode"]
+
+  datanode1:
+    image: jolmedilla/hadoop-datanode:arm64
+    platform: linux/arm64
+    container_name: datanode1
+    hostname: datanode1
+    user: "root"
+    networks:
+      - kafka-net-2
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"   # Ограничение использования CPU
+          memory: "2g"  # Ограничение использования RAM
+    shm_size: 10G
+    depends_on:
+      - namenode
+    ports:
+      - "9864:9864"  # HTTP-порт для Web UI DataNode №1
+      - "9970:9970"  # RPC порт для запросов от NameNode
+    volumes:
+      - ./common/hdfs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./common/hdfs/hdfs-site-datanode1.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ./common/hdfs/datanode_entrypoint.sh:/datanode_entrypoint.sh
+      - ./common/ca:/etc/kafka/secrets
+      - datanode_data1:/hdfs/datanode
+    entrypoint: ["/bin/bash", "/datanode_entrypoint.sh"]
+    command: ["hdfs", "datanode"]
+
+  datanode2:
+    image: jolmedilla/hadoop-datanode:arm64
+    platform: linux/arm64
+    container_name: datanode2
+    hostname: datanode2
+    user: "root"
+    networks:
+      - kafka-net-2
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"   # Ограничение использования CPU
+          memory: "2g"  # Ограничение использования RAM
+    shm_size: 10G
+    depends_on:
+      - namenode
+    ports:
+      - "9865:9864"  # HTTP-порт для Web UI DataNode №2
+      - "9971:9970"  # RPC порт для запросов от NameNode
+    volumes:
+      - ./common/hdfs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./common/hdfs/hdfs-site-datanode2.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
+      - ./common/hdfs/datanode_entrypoint.sh:/datanode_entrypoint.sh
+      - ./common/ca:/etc/kafka/secrets
+      - datanode_data2:/hdfs/datanode
+    entrypoint: ["/bin/bash", "/datanode_entrypoint.sh"]
+    command: ["hdfs", "datanode"]
+
+  # Apache Spark master node
+  spark-master:
+    image: bitnamilegacy/spark:3.5.4
+    container_name: spark-master
+    platform : linux/arm64
+    networks:
+      - kafka-net-2
+    ports:
+      - "8090:8080"  # HTTP-порт для Web UI Spark
+      - "7077:7077"  # Порт для Spark master-сервис
+    environment:
+      SPARK_MODE: master
+      SPARK_MASTER_HOST: spark-master
+    volumes:
+      - ./common/ca:/etc/kafka/secrets
+
+  # Apache Spark worker node
+  spark-worker:
+    image: bitnamilegacy/spark:3.5.4
+    container_name: spark-worker
+    platform: linux/arm64
+    networks:
+      - kafka-net-2
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+    volumes:
+      - ./common/ca:/etc/kafka/secrets
+
+volumes:
+  namenode_data:
+  datanode_data1:
+  datanode_data2:

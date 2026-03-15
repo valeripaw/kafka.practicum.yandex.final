@@ -10,7 +10,7 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>shop-api</artifactId>
+  <artifactId>analytical-system</artifactId>
   <packaging>jar</packaging>
 
   <properties>
@@ -38,7 +38,7 @@
         <executions>
           <execution>
             <configuration>
-              <mainClass>ru.valeripaw.kafka.ShopApiApplication</mainClass>
+              <mainClass>ru.valeripaw.kafka.AnalyticalSystemApplication</mainClass>
             </configuration>
             <goals>
               <goal>repackage</goal>
@@ -58,12 +58,38 @@
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-streams</artifactId>
+      <artifactId>kafka-clients</artifactId>
+      <version>3.7.0</version>
     </dependency>
     <dependency>
-      <groupId>io.confluent</groupId>
-      <artifactId>kafka-streams-avro-serde</artifactId>
-      <version>8.1.1</version>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>3.3.6</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j2-impl</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_2.12</artifactId>
+      <version>3.5.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-reload4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j2-impl</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 

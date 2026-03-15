@@ -11,15 +11,15 @@ COPY analytical-system/pom.xml analytical-system/pom.xml
 
 COPY . .
 
-RUN mvn -pl client-api -am clean package -DskipTests
+RUN mvn -pl analytical-system -am clean package -DskipTests
 
 # ---------- runtime ----------
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY --from=builder /build/client-api/target/*.jar app.jar
+COPY --from=builder /build/analytical-system/target/*.jar app.jar
 
-EXPOSE 9197
+EXPOSE 9090
 
 ENTRYPOINT ["java","-jar","app.jar"]

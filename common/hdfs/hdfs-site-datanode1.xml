@@ -1,0 +1,22 @@
+<configuration>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:/hdfs/datanode</value>
+  </property>
+  <!-- hostname должен совпадать с Docker network alias -->
+  <property>
+    <name>dfs.datanode.hostname</name>
+    <value>datanode1</value>
+  </property>
+  <!-- слушать на всех интерфейсах -->
+  <!-- RPC порт для запросов от NameNode -->
+  <property>
+    <name>dfs.datanode.address</name>
+    <value>0.0.0.0:9970</value>
+  </property>
+  <!-- HTTP-порт для Web UI DataNode №1 -->
+  <property>
+    <name>dfs.datanode.http.address</name>
+    <value>0.0.0.0:9864</value>
+  </property>
+</configuration>
