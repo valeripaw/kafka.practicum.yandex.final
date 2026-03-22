@@ -1,0 +1,42 @@
+server:
+  port: 9090
+
+spring:
+  docker:
+    compose:
+      enabled: false
+
+kafka:
+  bootstrap-servers: ${BOOTSTRAP_SERVERS}
+  schema-registry-url: ${SCHEMA_REGISTRY_URL}
+  security-protocol: SASL_SSL
+  sasl-mechanism: PLAIN
+  sasl-jaas-config: org.apache.kafka.common.security.plain.PlainLoginModule required username="hdfs" password="hdfs-secret";
+  ssl-truststore-password: qwerty
+  # consumer
+  allowed-products-topic:
+    topic: allowed-products
+    group-id: allowed-products.2
+    enable: true
+    enable-auto-commit: true
+    auto-commit-interval-ms: 1000
+    max-poll-records: 1
+    poll-duration-ms: 1000
+  client-requests-topic:
+    topic: client-requests
+    group-id: client-requests.2
+    enable: true
+    enable-auto-commit: true
+    auto-commit-interval-ms: 1000
+    max-poll-records: 1
+    poll-duration-ms: 1000
+  # producer
+  recommendations-event:
+    topic: recommendations
+    acks: "all"
+    retries: 3
+    retry-backoff-ms: 1000
+    enable-idempotence: true
+
+hdfs:
+  namenode: ${HDFS_NAMENODE}

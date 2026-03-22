@@ -1,0 +1,12 @@
+spring:
+  docker:
+    compose:
+      enabled: false
+
+kafka:
+  # кластер №2
+  bootstrap-servers: localhost:9094,localhost:9095
+  schema-registry-url: http://localhost:8079
+
+hdfs:
+  namenode: hdfs://localhost:9000

@@ -18,7 +18,8 @@ x-schema-registry-common-env: &schema-registry-common-env
     user_admin="admin-secret"
     user_producer="prod-secret"
     user_consumer="cons-secret"
-    user_kafkaconnect="kafkaconnect-secret";
+    user_kafkaconnect="kafkaconnect-secret"
+    user_hdfs="hdfs-secret";
   SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.jks
   SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: qwerty
 
@@ -50,7 +51,8 @@ x-kafka-common-env: &kafka-common-env
     user_admin="admin-secret"
     user_producer="prod-secret"
     user_consumer="cons-secret"
-    user_kafkaconnect="kafkaconnect-secret";
+    user_kafkaconnect="kafkaconnect-secret"
+    user_hdfs="hdfs-secret";
   KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka_server_jaas.conf"
 
 services:
@@ -285,7 +287,8 @@ services:
         user_admin="admin-secret"
         user_producer="prod-secret"
         user_consumer="cons-secret"
-        user_kafkaconnect="kafkaconnect-secret";
+        user_kafkaconnect="kafkaconnect-secret"
+        user_hdfs="hdfs-secret";
       KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/truststore.jks"
       KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "qwerty"
       KAFKA_CLUSTERS_0_READONLY_MODE: "false"
@@ -301,7 +304,8 @@ services:
         user_admin="admin-secret"
         user_producer="prod-secret"
         user_consumer="cons-secret"
-        user_kafkaconnect="kafkaconnect-secret";
+        user_kafkaconnect="kafkaconnect-secret"
+        user_hdfs="hdfs-secret";
       KAFKA_CLUSTERS_1_PROPERTIES_SSL_TRUSTSTORE_LOCATION: "/etc/kafka/secrets/truststore.jks"
       KAFKA_CLUSTERS_1_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: "qwerty"
       KAFKA_CLUSTERS_1_READONLY_MODE: "false"
