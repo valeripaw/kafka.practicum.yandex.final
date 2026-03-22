@@ -18,5 +18,5 @@ services:
       - kafka-net-2
     environment:
       BOOTSTRAP_SERVERS: kafka3:19094,kafka4:19095
-      SCHEMA_REGISTRY_URL: http://schema-registry1:8079
+      SCHEMA_REGISTRY_URL: http://schema-registry2:8079
       HDFS_NAMENODE: hdfs://namenode:9000

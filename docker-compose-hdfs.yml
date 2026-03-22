@@ -26,6 +26,7 @@ services:
       - "9000:9000"  # RPC порт для запросов к NameNode
     environment:
       HADOOP_NAMENODE_HOST: namenode
+      HDFS_CONF_dfs_replication: 1
     volumes:
       # задаёт базовые настройки Hadoop, указывая адрес NameNode.
       - ./common/hdfs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
@@ -59,6 +60,11 @@ services:
     ports:
       - "9864:9864"  # HTTP-порт для Web UI DataNode №1
       - "9970:9970"  # RPC порт для запросов от NameNode
+    environment:
+      HDFS_CONF_dfs_datanode_address: 0.0.0.0:9866
+      HDFS_CONF_dfs_datanode_http_address: 0.0.0.0:9864
+      HDFS_CONF_dfs_datanode_ipc_address: 0.0.0.0:9868
+      HDFS_CONF_dfs_replication: 1
     volumes:
       - ./common/hdfs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./common/hdfs/hdfs-site-datanode1.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
@@ -87,6 +93,11 @@ services:
     ports:
       - "9865:9864"  # HTTP-порт для Web UI DataNode №2
       - "9971:9970"  # RPC порт для запросов от NameNode
+    environment:
+      HDFS_CONF_dfs_datanode_address: 0.0.0.0:9866
+      HDFS_CONF_dfs_datanode_http_address: 0.0.0.0:9864
+      HDFS_CONF_dfs_datanode_ipc_address: 0.0.0.0:9868
+      HDFS_CONF_dfs_replication: 1
     volumes:
       - ./common/hdfs/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./common/hdfs/hdfs-site-datanode2.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml
@@ -109,6 +120,9 @@ services:
     environment:
       SPARK_MODE: master
       SPARK_MASTER_HOST: spark-master
+      # Fix for Java 17+ module access
+      SPARK_DAEMON_JAVA_OPTS: --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+      SPARK_SUBMIT_OPTS: --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
     volumes:
       - ./common/ca:/etc/kafka/secrets
 
@@ -124,6 +138,9 @@ services:
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
+      # Fix for Java 17+ module access
+      SPARK_DAEMON_JAVA_OPTS: --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
+      SPARK_SUBMIT_OPTS: --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
     volumes:
       - ./common/ca:/etc/kafka/secrets
 

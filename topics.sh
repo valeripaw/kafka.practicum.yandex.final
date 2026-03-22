@@ -132,6 +132,14 @@ docker exec kafka2-1 kafka-acls \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
   --allow-principal User:hdfs \
+  --operation WRITE \
+  --topic recommendations
+
+docker exec kafka2-1 kafka-acls \
+  --bootstrap-server kafka3:19094 \
+  --command-config /etc/kafka/secrets/admin-client-configs.conf \
+  --add \
+  --allow-principal User:hdfs \
   --operation READ \
   --topic allowed-products
 
