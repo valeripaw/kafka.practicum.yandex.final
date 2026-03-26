@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+
+rule_files:
+  - /etc/prometheus/rules/kafka-alerts.yml
+
+scrape_configs:
+  - job_name: 'kafka_cluster1'
+    static_configs:
+      - targets:
+          - kafka1:7072
+          - kafka2:7072
+
+  - job_name: 'kafka_cluster2'
+    static_configs:
+      - targets:
+          - kafka3:7072
+          - kafka4:7072
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'

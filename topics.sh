@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # кластер 1
-docker exec kafka1-1 kafka-topics \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-topics \
   --create \
   --topic products \
   --bootstrap-server kafka1:19092 \
@@ -9,7 +9,7 @@ docker exec kafka1-1 kafka-topics \
   --partitions 1 \
   --replication-factor 1
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server kafka1:19092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -18,7 +18,7 @@ docker exec kafka1-1 kafka-acls \
   --operation READ \
   --topic products
 
-docker exec kafka1-1 kafka-topics \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-topics \
   --create \
   --topic allowed-products \
   --bootstrap-server kafka1:19092 \
@@ -26,7 +26,7 @@ docker exec kafka1-1 kafka-topics \
   --partitions 1 \
   --replication-factor 1
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server kafka1:19092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -34,7 +34,7 @@ docker exec kafka1-1 kafka-acls \
   --operation WRITE \
   --topic allowed-products
 
-docker exec kafka1-1 kafka-topics \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-topics \
   --create \
   --topic client-requests \
   --bootstrap-server kafka1:19092 \
@@ -42,7 +42,7 @@ docker exec kafka1-1 kafka-topics \
   --partitions 1 \
   --replication-factor 1
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server kafka1:19092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -50,7 +50,7 @@ docker exec kafka1-1 kafka-acls \
   --operation WRITE \
   --topic client-requests
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -60,7 +60,7 @@ docker exec kafka1-1 kafka-acls \
 
 # kafka connect
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -71,7 +71,7 @@ docker exec kafka1-1 kafka-acls \
   --operation DESCRIBE \
   --topic connect-configs
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -82,7 +82,7 @@ docker exec kafka1-1 kafka-acls \
   --operation DESCRIBE \
   --topic connect-offsets
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -93,7 +93,7 @@ docker exec kafka1-1 kafka-acls \
   --operation DESCRIBE \
   --topic connect-status
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -101,7 +101,7 @@ docker exec kafka1-1 kafka-acls \
   --operation READ \
   --group kafka-connect
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server localhost:9092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -109,7 +109,7 @@ docker exec kafka1-1 kafka-acls \
   --operation READ \
   --group connect-allowed-products-postgres-sink
 
-docker exec kafka1-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka1-1 kafka-acls \
   --bootstrap-server kafka1:19092 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -119,7 +119,7 @@ docker exec kafka1-1 kafka-acls \
   --topic allowed-products
 
 # кластер 2
-docker exec kafka2-1 kafka-topics \
+docker exec -e KAFKA_OPTS="" kafka2-1 kafka-topics \
   --create \
   --topic recommendations \
   --bootstrap-server kafka3:19094 \
@@ -127,7 +127,7 @@ docker exec kafka2-1 kafka-topics \
   --partitions 1 \
   --replication-factor 1
 
-docker exec kafka2-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka2-1 kafka-acls \
   --bootstrap-server kafka3:19094 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -135,7 +135,7 @@ docker exec kafka2-1 kafka-acls \
   --operation WRITE \
   --topic recommendations
 
-docker exec kafka2-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka2-1 kafka-acls \
   --bootstrap-server kafka3:19094 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -143,7 +143,7 @@ docker exec kafka2-1 kafka-acls \
   --operation READ \
   --topic allowed-products
 
-docker exec kafka2-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka2-1 kafka-acls \
   --bootstrap-server kafka3:19094 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -151,7 +151,7 @@ docker exec kafka2-1 kafka-acls \
   --operation READ \
   --group allowed-products.2
 
-docker exec kafka2-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka2-1 kafka-acls \
   --bootstrap-server kafka3:19094 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \
@@ -159,7 +159,7 @@ docker exec kafka2-1 kafka-acls \
   --operation READ \
   --topic client-requests
 
-docker exec kafka2-1 kafka-acls \
+docker exec -e KAFKA_OPTS="" kafka2-1 kafka-acls \
   --bootstrap-server kafka3:19094 \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --add \

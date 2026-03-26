@@ -7,6 +7,8 @@ networks:
   kafka-net-2:
     driver: bridge
     name: kafka-cluster-network-2
+  monitoring:
+    driver: bridge
 
 x-schema-registry-common-env: &schema-registry-common-env
   SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SASL_SSL
@@ -53,7 +55,8 @@ x-kafka-common-env: &kafka-common-env
     user_consumer="cons-secret"
     user_kafkaconnect="kafkaconnect-secret"
     user_hdfs="hdfs-secret";
-  KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka_server_jaas.conf"
+  KAFKA_JMX_PORT: 9999
+  KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka_server_jaas.conf -javaagent:/common/jmx/jmx_prometheus_javaagent-0.20.0.jar=7072:/etc/jmx_exporter.yml"
 
 services:
 
@@ -114,6 +117,7 @@ services:
       - kafka-net-1
     ports:
       - "9092:9092"
+      - "7080:7072"
     environment:
       <<: *kafka-common-env
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181
@@ -130,6 +134,8 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     volumes:
       - ./common/kafka1:/etc/kafka/secrets
+      - ./common/jmx:/common/jmx
+      - ./common/jmx/jmx_exporter.yml:/etc/jmx_exporter.yml
   kafka1-2:
     image: confluentinc/cp-kafka:7.6.0
     container_name: kafka1-2
@@ -141,6 +147,7 @@ services:
       - kafka-net-1
     ports:
       - "9093:9093"
+      - "7081:7072"
     environment:
       <<: *kafka-common-env
       KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181
@@ -149,6 +156,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:19093,EXTERNAL://localhost:9093
     volumes:
       - ./common/kafka2:/etc/kafka/secrets
+      - ./common/jmx:/common/jmx
+      - ./common/jmx/jmx_exporter.yml:/etc/jmx_exporter.yml
   schema-registry1:
     image: confluentinc/cp-schema-registry
     container_name: schema-registry1
@@ -205,6 +214,7 @@ services:
       - kafka-net-2
     ports:
       - "9094:9094"
+      - "7082:7072"
     environment:
       <<: *kafka-common-env
       KAFKA_ZOOKEEPER_CONNECT: zookeeper2:2182
@@ -221,6 +231,8 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     volumes:
       - ./common/kafka3:/etc/kafka/secrets
+      - ./common/jmx:/common/jmx
+      - ./common/jmx/jmx_exporter.yml:/etc/jmx_exporter.yml
   kafka2-2:
     image: confluentinc/cp-kafka:7.6.0
     container_name: kafka2-2
@@ -232,6 +244,7 @@ services:
       - kafka-net-2
     ports:
       - "9095:9095"
+      - "7083:7072"
     environment:
       <<: *kafka-common-env
       KAFKA_ZOOKEEPER_CONNECT: zookeeper2:2182
@@ -240,6 +253,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka4:19095,EXTERNAL://localhost:9095
     volumes:
       - ./common/kafka4:/etc/kafka/secrets
+      - ./common/jmx:/common/jmx
+      - ./common/jmx/jmx_exporter.yml:/etc/jmx_exporter.yml
   schema-registry2:
     image: confluentinc/cp-schema-registry
     container_name: schema-registry2
@@ -311,3 +326,51 @@ services:
       KAFKA_CLUSTERS_1_READONLY_MODE: "false"
     volumes:
       - ./common/ca:/etc/kafka/secrets
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    platform: linux/arm64
+    ports:
+      - 9090:9090
+    depends_on:
+      - kafka1-1
+      - kafka1-2
+      - kafka2-1
+      - kafka2-2
+    volumes:
+      - ./common/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./common/prometheus:/prometheus
+      - ./common/alertmanager:/etc/prometheus/rules
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - kafka-net-1
+      - kafka-net-2
+      - monitoring
+
+  grafana:
+    build: ./common/grafana
+    container_name: grafana
+    platform: linux/arm64
+    ports:
+      - 3000:3000
+    environment:
+      GF_PATHS_DATA: /var/lib/grafana
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - prometheus
+    networks:
+      - kafka-net-1
+      - kafka-net-2
+      - monitoring
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    networks:
+      - monitoring
+    ports:
+      - "9014:9093"
+    volumes:
+      - ./common/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
