@@ -1,0 +1,11 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'noop'
+
+receivers:
+  - name: 'noop'
+    webhook_configs: []
+
+inhibit_rules: []

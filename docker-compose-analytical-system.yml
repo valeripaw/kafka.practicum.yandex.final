@@ -13,7 +13,7 @@ services:
     platform: linux/arm64
     container_name: analytical-system
     ports:
-      - "9090:9090"
+      - "9063:9063"
     networks:
       - kafka-net-2
     environment:
