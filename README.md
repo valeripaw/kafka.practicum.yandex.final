@@ -235,6 +235,8 @@ docker exec kafka1-1 kafka-acls \
   --topic allowed-products
 ```
 
+### кластер №2
+
 Создаем топик `recommendations` на кластере №2:
 
 ```
@@ -245,6 +247,18 @@ docker exec kafka2-1 kafka-topics \
   --command-config /etc/kafka/secrets/admin-client-configs.conf \
   --partitions 1 \
   --replication-factor 1
+```
+
+Добавляем прав юзеру `hdfs` на запись в топик `recommendations` в кластере №2:
+
+```
+docker exec kafka2-1 kafka-acls \
+  --bootstrap-server kafka3:19094 \
+  --command-config /etc/kafka/secrets/admin-client-configs.conf \
+  --add \
+  --allow-principal User:hdfs \
+  --operation WRITE \
+  --topic recommendations
 ```
 
 Добавляем прав юзеру `hdfs` на чтение топиков `allowed-products` и `client-requests` в кластере №2:
@@ -553,55 +567,23 @@ hdfs dfs -mkdir -p /data
 hdfs dfs -mkdir -p /data/allowed-products
 hdfs dfs -mkdir -p /data/client-requests
 
-# 1.1. Проверить, что директория создалась можно так
+# 2. Даём права на чтение, запись и выполнение 
+hdfs dfs -chmod 777 /data
+hdfs dfs -chmod 777 /data/allowed-products
+hdfs dfs -chmod 777 /data/client-requests
+
+# 2.1. Проверяем, поменялся набор прав
 hdfs dfs -ls /
 
-Found 1 items
-drwxr-xr-x   - root supergroup          0 2026-03-22 10:09 /data
+    Found 1 items
+    drwxrwxr-x   - root supergroup          0 2026-03-22 10:09 /data
 
 hdfs dfs -ls /data
 
-Found 2 items
-drwxr-xr-x   - root supergroup          0 2026-03-22 12:00 /data/allowed-products
-drwxr-xr-x   - root supergroup          0 2026-03-22 12:00 /data/client-requests
-
-# 2. Меняем владельца на пользователя valeri и группу supergroup
-hdfs dfs -chown valeri:supergroup /data
-hdfs dfs -chown valeri:supergroup /data/allowed-products
-hdfs dfs -chown valeri:supergroup /data/client-requests
-
-# 2.1. Снова проверяем (root сменился на valeri)
-hdfs dfs -ls /
-
-Found 1 items
-drwxr-xr-x   - valeri supergroup          0 2026-03-22 10:09 /data
-
-hdfs dfs -ls /data
-
-Found 2 items
-drwxr-xr-x   - valeri supergroup          0 2026-03-22 12:00 /data/allowed-products
-drwxr-xr-x   - valeri supergroup          0 2026-03-22 12:00 /data/client-requests
-
-# 3. Даём права на чтение, запись и выполнение владельцу и группе
-hdfs dfs -chmod 775 /data
-hdfs dfs -chmod 775 /data/allowed-products
-hdfs dfs -chmod 775 /data/client-requests
-
-# 3.1. Снова проверяем (поменялся набор прав)
-hdfs dfs -ls /
-
-Found 1 items
-drwxrwxr-x   - valeri supergroup          0 2026-03-22 10:09 /data
-
-hdfs dfs -ls /data
-
-Found 2 items
-drwxrwxr-x   - valeri supergroup          0 2026-03-22 12:00 /data/allowed-products
-drwxrwxr-x   - valeri supergroup          0 2026-03-22 12:00 /data/client-requests
+    Found 2 items
+    drwxrwxr-x   - root supergroup          0 2026-03-22 12:00 /data/allowed-products
+    drwxrwxr-x   - root supergroup          0 2026-03-22 12:00 /data/client-requests
 ```
-
-пользователь `valeri` - мой пользователь, замените на вашего.      
-Если у вас макбук, имя пользователя можно узнать командой `whoami`.
 
 Посмотреть содержимое директории `/data` в HDFS:
 
@@ -634,7 +616,27 @@ hdfs dfs -setrep -w 1 /data/client-requests
 chmod -R 777 /hdfs/datanode
 ```
 
-## Архитектура аналитической системы
+## Аналитическая система
+
+Запустите командой:
+
+```
+docker-compose -f docker-compose-analytical-system.yml up -d
+```
+
+После запуска, приложение будет автоматически собирать данные с топиков `allowed-products` и `client-requests` и
+складывать их в файлы в формета `json`.
+
+Чтобы запустить расчеты рекомендаций на Spark нужно выполнить команду:
+
+```
+curl -X POST http://localhost:9090/api/spark/run
+```
+
+После это данные будут сохранены в hdfs по пути `/analytics/recommendations` и затем отправлены в топик
+`recommendations` кластера №2.
+
+Архитектура аналитической системы
 
 ```
 Kafka кластер №2: топики allowed-products и client-requests

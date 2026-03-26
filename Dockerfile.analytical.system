@@ -20,6 +20,8 @@ WORKDIR /app
 
 COPY --from=builder /build/analytical-system/target/*.jar app.jar
 
+ENV JAVA_TOOL_OPTIONS="--add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-exports=java.base/sun.nio.ch=ALL-UNNAMED"
+
 EXPOSE 9090
 
 ENTRYPOINT ["java","-jar","app.jar"]

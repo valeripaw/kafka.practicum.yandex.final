@@ -1,10 +1,8 @@
 package ru.valeripaw.kafka.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -20,8 +18,11 @@ import ru.valeripaw.kafka.properties.HdfsProperties;
 import ru.valeripaw.kafka.properties.KafkaProperties;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,17 +38,19 @@ public class KafkaToHdfsService {
     private final KafkaConsumer<String, ClientRequestAvro> clientRequestConsumer;
     private final HdfsProperties hdfsProperties;
     private final KafkaProperties kafkaProperties;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void moveData() throws IOException {
         Configuration conf = new Configuration();
         conf.set("fs.defaultFS", hdfsProperties.getNamenode());
+        conf.setInt("dfs.replication", 1);
 
         FileSystem fs = FileSystem.get(conf);
 
         log.info("Writing to: {}", fs.getUri());
 
-        try (ExecutorService executorProducts = Executors.newSingleThreadExecutor();
-             ExecutorService executorClientRequests = Executors.newSingleThreadExecutor()) {
+        try {
+            ExecutorService executorProducts = Executors.newSingleThreadExecutor();
             executorProducts.execute(() -> {
                 try {
                     log.info("Start consuming allowed-products");
@@ -57,6 +60,7 @@ public class KafkaToHdfsService {
                 }
             });
 
+            ExecutorService executorClientRequests = Executors.newSingleThreadExecutor();
             executorClientRequests.execute(() -> {
                 try {
                     log.info("Start consuming client-requests");
@@ -92,37 +96,43 @@ public class KafkaToHdfsService {
         }
     }
 
-    private <T extends SpecificRecord> void writeToFile(
+    public <T extends SpecificRecord> void writeToFile(
             FileSystem hdfs,
             ConsumerRecord<String, T> record
     ) throws IOException {
         String topic = record.topic();
         T value = record.value();
 
-        String path = "/data/" + topic + "/" + System.currentTimeMillis() + ".avro";
-        log.info("writeToFile\nrecord {}\nfile {}", record.value(), path);
+        String path = "/data/" + topic + "/" + System.currentTimeMillis() + ".json";
+        log.info("writeToJsonFile\nrecord {}\nfile {}", value, path);
 
         Path filePath = new Path(path);
         hdfs.mkdirs(filePath.getParent());
 
-        Exception mainException = null;
-
         try (FSDataOutputStream out = hdfs.create(filePath, true)) {
-            DatumWriter<T> writer = new SpecificDatumWriter<>(value.getSchema());
-            try (DataFileWriter<T> dataWriter = new DataFileWriter<>(writer)) {
-                dataWriter.create(value.getSchema(), out);
-                dataWriter.append(value);
-            } catch (Exception e) {
-                mainException = e;
-                throw e;
-            }
+            // Конвертируем Avro SpecificRecord в Map
+            Map<String, Object> map = convertAvroToMap(value);
+            map.remove("images");
+            map.remove("tags");
+            // Сериализуем в JSON и записываем в HDFS
+            String json = objectMapper.writeValueAsString(map);
+            out.write(json.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             log.error("Failed to write record to HDFS at path {}: {}", filePath, e.getMessage(), e);
-            if (mainException != null && mainException != e) {
-                mainException.addSuppressed(e);
-            }
             throw e;
         }
+    }
+
+    private <T extends SpecificRecord> Map<String, Object> convertAvroToMap(T record) {
+        Map<String, Object> map = new HashMap<>();
+        record.getSchema().getFields().forEach(field -> {
+            Object value = record.get(field.pos());
+            if (value instanceof SpecificRecord) {
+                value = convertAvroToMap((SpecificRecord) value);
+            }
+            map.put(field.name(), value);
+        });
+        return map;
     }
 
 }
